@@ -6,5 +6,5 @@
     "coffee/index.coffee"
   ],
   "names": [],
-  "mappings": ";AAAA;CAAA;CAAA"
+  "mappings": ";AAAA;CAAA,CAAA,CAA6B,IAAtB,WAAP,IAA6B;;CAA7B,CACA,CAAsB,IAAf,IAAP,IAAsB;;CADtB,CAGA,CAAwB,GAAA,CAAjB,EAAkB,IAAzB;CACc,GAAR,EAAA,CAAO,IAAP,OAAA;CAJN,EAGwB;CAHxB"
 }
