@@ -5,18 +5,26 @@ class AccessToken
     @clientId = props.clientId
     @type = props.type
     @value = props.value
-    @expiresAt = props.expiresAt
+    @expiresIn = props.expiresIn
+    @createdAt = props.createdAt
     @refreshToken = props.refreshToken
+    @setDefaults()
 
-  expireIn: (ms = 0) ->
-    currentTime = new Date().getTime()
-    expiresAt = currentTime + ms
-    @expiresAt = new Date expiresAt
+  setDefaults: ->
+    @createdAt ?= new Date()
+
+  getCreationDate: ->
+    return @createdAt if @createdAt instanceof Date
+    return new Date @createdAt
+
+  getExpirationDate: ->
+    return undefined unless @expiresIn
+    creationDate = @getCreationDate()
+    expirationMs = creationDate.getTime() + @expiresIn
+    return new Date expirationMs
 
   isExpired: (currentDate) ->
-    return false unless @expiresAt?
     currentDate ?= new Date()
-    expirationDate = new Date @expiresAt
-    return currentDate > expirationDate
+    return currentDate > @getExpirationDate()
 
 module.exports = AccessToken

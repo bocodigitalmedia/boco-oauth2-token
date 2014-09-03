@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "TimeInMs.js",
+  "sourceRoot": "..",
+  "sources": [
+    "coffee/TimeInMs.coffee"
+  ],
+  "names": [],
+  "mappings": ";AAAA;CAAA,KAAA,yBAAA;;CAAA,CAAA,CAAS,CAAT,EAAA;;CAAA,CACA,CAAS,GAAT;;CADA,CAEA,CAAO,CAAP,EAFA;;CAAA,CAGA,CAAA,CAHA;;CAAA,CAIA,CAAO,CAAP;;CAJA,CAMA,CACE,GADI,CAAN;CACE,CAAQ,EAAR,EAAA;CAAA,CACQ,EAAR,EAAA;CADA,CAEM,EAAN;CAFA,CAGK,CAAL,CAAA;CAHA,CAIM,EAAN;CAXF,GAAA;CAAA"
+}

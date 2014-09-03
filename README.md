@@ -9,17 +9,18 @@ The following code is used to help run asynchronous steps within this readme.
 
     Async = require 'async'
     steps = []
-    step = (name, fn) ->
-      steps.push name: name, fn: fn
+    step = (name, fn) -> steps.push name: name, fn: fn
 
-    runSteps = ->
-      fns = steps.map (step) -> step.fn
-      Async.series fns, (error) ->
+    process.nextTick ->
+
+      runStep = (step, done) ->
+        console.log "* #{step.name}"
+        step.fn.call null, done
+
+      Async.eachSeries steps, runStep, (error) ->
         return process.exit(0) unless error?
         console.error error
         process.exit 1
-
-    setImmediate runSteps
 
 ## configuration
 
@@ -61,6 +62,7 @@ The access token repository to use for this service.
 Grant a token for a user to a client by passing in the `userId` and  `clientId` to the `grantAccessToken` method.
 
     step "generate a token", (done) ->
+
       params =
         clientId: 'fd21166c-7da2-4316-b469-21b6f1545b90'
         userId: '80bae2aa-f835-449a-9f02-27f20bf64076'
@@ -78,6 +80,7 @@ Grant a token for a user to a client by passing in the `userId` and  `clientId` 
         assert.equal "bearer", accessToken.type
         done()
 
+    
 
 <br><br><br><br><br>
 ---
