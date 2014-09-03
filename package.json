@@ -1,6 +1,6 @@
 {
   "name": "boco-oauth2-token",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "OAuth2 Token Service",
   "main": "./lib/index.js",
   "scripts": {
