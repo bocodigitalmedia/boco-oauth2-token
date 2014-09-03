@@ -18,8 +18,8 @@ class MemoryAccessTokenRepository
     accessToken = @collection[value]
     return callback null, accessToken
 
-  findByRefreshToken: (refreshToken, callback) ->
-    value = @refreshTokenIndex[refreshToken]
+  findByRefreshToken: (query, callback) ->
+    value = @refreshTokenIndex[query.refreshToken]
     return callback null, null unless value?
     accessToken = @collection[value]
     return callback null, accessToken

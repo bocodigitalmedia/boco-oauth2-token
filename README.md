@@ -29,7 +29,7 @@ The following code is used to help run asynchronous steps within this readme.
 ### config.accessTokenExpiry
 The time in ms for a token to expire.
 
-    config.accessTokenExpiry = 1 * 60 * 60 * 1000
+    config.accessTokenExpiry = 60000
 
 ### config.accessTokenType
 The type of token to dispense.
@@ -40,18 +40,8 @@ The type of token to dispense.
 
 The access token repository to use for this service.
 
-    class MemoryRepository
-      constructor: ->
-        @accessTokens = {}
-
-      store: (id, accessToken, callback) ->
-        @accessTokens[id] = accessToken
-        callback null, accessToken
-
-      find: (id, callback) ->
-        callback null, @accessTokens[id]
-
-    config.tokenRepository = new MemoryRepository()
+    config.accessTokenRepository =
+      new BocoOAuth2Token.AccessTokenRepository.Memory()
 
 ## creating the service
 
@@ -61,7 +51,7 @@ The access token repository to use for this service.
 
 Grant a token for a user to a client by passing in the `userId` and  `clientId` to the `grantAccessToken` method.
 
-    step "generate a token", (done) ->
+    step "grant a token", (done) ->
 
       params =
         clientId: 'fd21166c-7da2-4316-b469-21b6f1545b90'
@@ -72,15 +62,36 @@ Grant a token for a user to a client by passing in the `userId` and  `clientId` 
 
       tokenService.grantAccessToken params, (error, accessToken) ->
         return done error if error?
+        delete tokenService.generateAccessTokenString
+        delete tokenService.generateRefreshTokenString
 
         assert.equal 'fd21166c-7da2-4316-b469-21b6f1545b90', accessToken.clientId
         assert.equal '80bae2aa-f835-449a-9f02-27f20bf64076', accessToken.userId
         assert.equal "access-token-1", accessToken.value
         assert.equal "refresh-token-1", accessToken.refreshToken
+        assert.equal 60000, accessToken.expiresIn
         assert.equal "bearer", accessToken.type
         done()
 
-    
+## refresh a token
+
+Refresh a token by passing in the `clientId` and the `refreshToken` to the `refreshAccessToken` method.
+
+    step "refresh a token", (done) ->
+
+      params =
+        clientId: 'fd21166c-7da2-4316-b469-21b6f1545b90'
+        refreshToken: "refresh-token-1"
+
+      tokenService.refreshAccessToken params, (error, accessToken) ->
+        return done error if error?
+
+        assert.equal 'fd21166c-7da2-4316-b469-21b6f1545b90', accessToken.clientId
+        assert.equal '80bae2aa-f835-449a-9f02-27f20bf64076', accessToken.userId
+        assert.equal 60000, accessToken.expiresIn
+        assert.equal "bearer", accessToken.type
+        done()
+
 
 <br><br><br><br><br>
 ---
