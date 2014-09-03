@@ -19,6 +19,7 @@ The following code is used to help run asynchronous steps within this readme.
 
       Async.eachSeries steps, runStep, (error) ->
         return process.exit(0) unless error?
+        console.log "An error occurred:"
         console.error error
         process.exit 1
 
@@ -91,7 +92,6 @@ Refresh a token by passing in the `clientId` and the `refreshToken` to the `refr
         assert.equal 60000, accessToken.expiresIn
         assert.equal "bearer", accessToken.type
         done()
-
 
 <br><br><br><br><br>
 ---

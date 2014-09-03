@@ -1,3 +1,4 @@
+Async = require 'async'
 AccessTokenRepository = require './AccessTokenRepository'
 AccessToken = require './AccessToken'
 TimeInMs = require './TimeInMs'
@@ -19,15 +20,14 @@ class AccessTokenService
   constructAccessToken: (props = {}) ->
     token = new AccessToken props
 
-  generateAccessTokenString: (bytes = 32, encoding = 'base64') ->
+  generateAccessTokenString: (bytes = 16, encoding = 'base64') ->
     require('crypto').randomBytes(bytes).toString(encoding)
 
-  generateRefreshTokenString: (bytes = 32, encoding = 'base64') ->
+  generateRefreshTokenString: (bytes = 16, encoding = 'base64') ->
     require('crypto').randomBytes(bytes).toString(encoding)
 
   grantAccessToken: (params = {}, callback) ->
 
-    # Construct a new token
     accessToken = @constructAccessToken
       type: @accessTokenType
       clientId: params.clientId
@@ -42,33 +42,65 @@ class AccessTokenService
       return callback null, accessToken
 
   refreshAccessToken: (params = {}, callback) ->
-    clientId = params.clientId
-    refreshToken = params.refreshToken
-    query = refreshToken: refreshToken
-    service = this
-    accessTokenRepository = @accessTokenRepository
+    _clientId = params.clientId
+    _refreshToken = params.refreshToken
+    _service = this
+    _accessTokenRepository = @accessTokenRepository
+    _oldAccessToken = null
+    _newAccessToken = null
 
-    accessTokenRepository.findByRefreshToken query, (error, accessToken) ->
+    findAccessToken = (done) ->
+      query = refreshToken: _refreshToken
+      _accessTokenRepository.findByRefreshToken query, (error, accessToken) ->
+        return done error if error?
+        _oldAccessToken = accessToken
+        done()
+
+    assertAccessTokenFound = (done) ->
+      error = Error "No token found with this refresh token"
+      return done(error) unless _oldAccessToken?
+      done()
+
+    assertAccessTokenBelongsToClient = (done) ->
+      error = Error "Access token does not belong to this client"
+      return done(error) unless _oldAccessToken.clientId is _clientId
+      done()
+
+    constructNewAccessToken = (done) ->
+      newAccessToken = _service.constructAccessToken
+        type: _oldAccessToken.type
+        clientId: _oldAccessToken.clientId
+        userId: _oldAccessToken.userId
+        expiresIn: _oldAccessToken.expiresIn
+
+      newAccessToken.value = _service.generateAccessTokenString()
+      newAccessToken.refreshToken = _service.generateRefreshTokenString()
+      _newAccessToken = newAccessToken
+      return done()
+
+    storeNewAccessToken = (done) ->
+      _accessTokenRepository.store _newAccessToken, (error, accessToken) ->
+        return done error if error?
+        _newAccessToken = accessToken
+        done()
+
+    markOldAccessTokenAsRefreshed = (done) ->
+      _oldAccessToken.hasBeenRefreshed = true
+      _accessTokenRepository.store _oldAccessToken, (error) ->
+        return done error if error?
+        done()
+
+    steps = [
+      findAccessToken
+      assertAccessTokenFound
+      assertAccessTokenBelongsToClient
+      constructNewAccessToken
+      storeNewAccessToken
+      markOldAccessTokenAsRefreshed
+    ]
+
+    Async.series steps, (error) ->
       return callback error if error?
-
-      unless accessToken?
-        return callback Error("No token found with this refresh token")
-
-      unless accessToken.clientId is clientId
-        return callback Error("Access token belongs to another client")
-
-      newAccessToken = service.constructAccessToken
-        type: accessToken.type
-        clientId: accessToken.clientId
-        userId: accessToken.userId
-        expiresIn: accessToken.expiresIn
-
-      newAccessToken.value = service.generateAccessTokenString()
-      newAccessToken.refreshToken = service.generateRefreshTokenString()
-
-      accessTokenRepository.store newAccessToken, (error, newAccessToken) ->
-        return callback error if error?
-        return callback null, newAccessToken
-
+      return callback null, _newAccessToken
 
 module.exports = AccessTokenService

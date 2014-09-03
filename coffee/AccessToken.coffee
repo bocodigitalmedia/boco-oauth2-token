@@ -8,10 +8,12 @@ class AccessToken
     @expiresIn = props.expiresIn
     @createdAt = props.createdAt
     @refreshToken = props.refreshToken
+    @hasBeenRefreshed = props.hasBeenRefreshed
     @setDefaults()
 
   setDefaults: ->
     @createdAt ?= new Date()
+    @hasBeenRefreshed ?= false
 
   getCreationDate: ->
     return @createdAt if @createdAt instanceof Date
