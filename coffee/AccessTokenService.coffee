@@ -1,9 +1,11 @@
 Async = require 'async'
 AccessTokenRepository = require './AccessTokenRepository'
 AccessToken = require './AccessToken'
-TimeInMs = require './TimeInMs'
+MS = require('boco-time').MilliSeconds
 
 class AccessTokenService
+  @DEFAULT_ACCESS_TOKEN_EXPIRY: MS.hours(4)
+  @DEFAULT_REFRESH_TOKEN_EXPIRY: MS.weeks(2)
 
   constructor: (props = {}) ->
     @accessTokenRepository = props.accessTokenRepository
@@ -13,9 +15,9 @@ class AccessTokenService
 
   setDefaults: ->
     @accessTokenType ?= "bearer"
-    @accessTokenExpiry ?= 4 * TimeInMs.hour
-    @refreshTokenExpiry ?= 2 * TimeInMs.week
-    @accessTokenRepository ?= new AccessTokenRepository.Memory()
+    @accessTokenExpiry ?= @constructor.DEFAULT_ACCESS_TOKEN_EXPIRY
+    @refreshTokenExpiry ?= @constructor.DEFAULT_REFRESH_TOKEN_EXPIRY
+    @accessTokenRepository ?= new AccessTokenRepository()
 
   constructAccessToken: (props = {}) ->
     token = new AccessToken props

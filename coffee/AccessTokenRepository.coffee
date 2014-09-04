@@ -1,4 +1,4 @@
-class MemoryAccessTokenRepository
+class AccessTokenRepository
 
   constructor: (props = {}) ->
     @collection = props.collection
@@ -24,4 +24,4 @@ class MemoryAccessTokenRepository
     accessToken = @collection[value]
     return callback null, accessToken
 
-module.exports = MemoryAccessTokenRepository
+module.exports = AccessTokenRepository
